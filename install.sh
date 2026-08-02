@@ -3,7 +3,7 @@
 # Usage: voir README.md / `install.sh --help`
 set -euo pipefail
 
-FLASH_DEV_REPO="${FLASH_DEV_REPO:-https://github.com/<ton-user>/flash-dev}"
+FLASH_DEV_REPO="${FLASH_DEV_REPO:-https://github.com/nfassorydiaby/flash-dev}"
 FLASH_DEV_BRANCH="${FLASH_DEV_BRANCH:-main}"
 FLASH_DEV_VERSION="0.1.0"
 
