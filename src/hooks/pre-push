@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# flash-dev — pre-push
+# Refuse de pousser la branche par défaut si une story mergée n'a pas de
+# docs/reviews/<id>.md avec "Ship allowed: yes".
+set -euo pipefail
+
+default_branch="$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's#origin/##' || echo main)"
+current_branch="$(git symbolic-ref --short -q HEAD || true)"
+[ -n "$current_branch" ] || exit 0
+
+[ "$current_branch" = "$default_branch" ] || exit 0
+
+shopt -s nullglob
+missing=()
+for review in docs/reviews/*.md; do
+  if ! grep -qE '^Ship allowed:[[:space:]]*yes[[:space:]]*$' "$review"; then
+    missing+=("$review")
+  fi
+done
+
+if [ "${#missing[@]}" -gt 0 ]; then
+  echo "[flash-dev] pre-push: bloqué — review(s) sans 'Ship allowed: yes' sur $default_branch :" >&2
+  printf '  - %s\n' "${missing[@]}" >&2
+  echo "[flash-dev] Termine /fd-review et /fd-security avant de pousser $default_branch." >&2
+  exit 1
+fi
+
+exit 0

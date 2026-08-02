@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# flash-dev — pre-commit
+# Refuse un commit de CODE sur une branche feature/<id> si
+# docs/plans/<id>.md n'existe pas ou si validated: no.
+# Les commits docs-only passent toujours.
+set -euo pipefail
+
+branch="$(git symbolic-ref --short -q HEAD || true)"
+[ -n "$branch" ] || exit 0 # HEAD non-née (avant le tout premier commit) : rien à vérifier
+
+case "$branch" in
+  feature/*) story_id="${branch#feature/}" ;;
+  *) exit 0 ;; # règle uniquement les branches feature/<id>
+esac
+
+staged="$(git diff --cached --name-only)"
+[ -n "$staged" ] || exit 0
+
+# Un commit qui ne touche que docs/**, *.md ou README/CHANGELOG est
+# toujours autorisé.
+non_docs="$(echo "$staged" | grep -Ev '^(docs/|.*\.md$|README|CHANGELOG)' || true)"
+if [ -z "$non_docs" ]; then
+  exit 0
+fi
+
+plan_file="docs/plans/${story_id}.md"
+if [ ! -f "$plan_file" ]; then
+  echo "[flash-dev] pre-commit: bloqué — $plan_file introuvable pour la branche $branch." >&2
+  echo "[flash-dev] Lance /fd-plan ${story_id} avant de coder." >&2
+  exit 1
+fi
+
+if ! grep -qE '^validated:[[:space:]]*yes[[:space:]]*$' "$plan_file"; then
+  echo "[flash-dev] pre-commit: bloqué — $plan_file n'est pas validé (validated: yes requis)." >&2
+  exit 1
+fi
+
+exit 0
