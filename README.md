@@ -9,10 +9,13 @@ n'est écrit hors du pipeline validé**.
 
 ```
 Cadrage (une fois par projet)
-  PRD → Stories → Stories Review → Architecture → Standards
+  PRD → Stories → Stories Review → Architecture → Design System → Standards
 
 Par story (cycle répété)
-  Research → Plan (validé) → Execute → Test → Review → Security → Doc → Ship
+  Research → Design → Plan (validé) → Execute → Test → Review → Security → Doc → Ship
+
+Infra (au besoin)
+  Infra (Docker/CI/CD) · Deploy
 
 Transverse
   Status · Backlog · Orchestrator
@@ -26,13 +29,13 @@ Depuis la racine de ton projet :
 
 ```bash
 cd mon-projet
-curl -fsSL https://raw.githubusercontent.com/<ton-user>/flash-dev/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/nfassorydiaby/flash-dev/main/install.sh | bash
 ```
 
 Ou en clonant d'abord :
 
 ```bash
-git clone https://github.com/<ton-user>/flash-dev.git ~/tools/flash-dev
+git clone https://github.com/nfassorydiaby/flash-dev.git ~/tools/flash-dev
 cd mon-projet
 ~/tools/flash-dev/install.sh
 ```
@@ -56,9 +59,9 @@ Après un install global, dépose les fichiers par projet (templates + règles) 
 ```bash
 ~/tools/flash-dev/install.sh update
 # ou sans clone :
-curl -fsSL https://raw.githubusercontent.com/<ton-user>/flash-dev/main/install.sh | bash -s -- update
+curl -fsSL https://raw.githubusercontent.com/nfassorydiaby/flash-dev/main/install.sh | bash -s -- update
 # pour écraser aussi les templates modifiés localement :
-curl -fsSL https://raw.githubusercontent.com/<ton-user>/flash-dev/main/install.sh | bash -s -- update --force
+curl -fsSL https://raw.githubusercontent.com/nfassorydiaby/flash-dev/main/install.sh | bash -s -- update --force
 ```
 
 Un template modifié localement n'est jamais écrasé sans `--force`.
@@ -74,10 +77,12 @@ merge à la main.
 /fd-stories
 /fd-stories-review
 /fd-architect
+/fd-design-system
 /fd-standards
 
 # par story
 /fd-research <story>
+/fd-design <story>
 /fd-plan <story>
 /fd-execute <story>
 /fd-test <story>
@@ -88,6 +93,10 @@ merge à la main.
 
 # ou le cycle complet avec checkpoints humains
 /fd-orchestrator <story>
+
+# infra — au besoin, pas seulement au démarrage
+/fd-infra
+/fd-deploy [env]
 
 # gestion de projet
 /fd-status

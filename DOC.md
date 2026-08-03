@@ -26,11 +26,13 @@ flowchart TD
         B --> C["/fd-stories"]
         C --> D["/fd-stories-review"]
         D --> E["/fd-architect"]
-        E --> F["/fd-standards"]
+        E --> DS["/fd-design-system"]
+        DS --> F["/fd-standards"]
     end
 
     subgraph Story["Par story — cycle répété"]
-        G["/fd-research"] --> H["/fd-plan"]
+        G["/fd-research"] --> DG["/fd-design"]
+        DG --> H["/fd-plan"]
         H -->|validated: yes| I["/fd-execute"]
         I --> J["/fd-test"]
         J --> K["/fd-review"]
@@ -39,8 +41,15 @@ flowchart TD
         M --> N["/fd-ship"]
     end
 
+    subgraph Infra["Infra — au besoin"]
+        P["/fd-infra"]
+        Q["/fd-deploy"]
+    end
+
     F --> G
     N -.->|/fd-status| G
+    F -.-> P
+    N -.-> Q
 
     O["/fd-orchestrator"] -.-> G
     O -.-> N
@@ -52,6 +61,7 @@ flowchart TD
 |-------------|------------------------|-----------------------------------|
 | todo        | `/fd-stories`           | `docs/stories.md`                 |
 | researched  | `/fd-research`          | `docs/research/<id>.md`           |
+| designed    | `/fd-design`            | `docs/designs/<id>.md` (ou mention explicite "pas d'impact visible") |
 | planned     | `/fd-plan`              | `docs/plans/<id>.md` (`validated: no`) |
 | validated   | relecture humaine       | `docs/plans/<id>.md` (`validated: yes`) |
 | executed    | `/fd-execute`           | code + `docs/plans/<id>.md`       |
@@ -72,6 +82,7 @@ flowchart TD
 | `/fd-stories`        | Découpe le PRD en stories indépendantes et séquencées (`docs/stories.md`). |
 | `/fd-stories-review` | Relit les stories : dépendances, taille, ambiguïté, critères d'acceptation. |
 | `/fd-architect`      | Produit/actualise l'architecture (`docs/architecture.md`) et les ADR. |
+| `/fd-design-system`  | Définit le design system : tokens visuels, composants, accessibilité (`docs/design-system.md`). |
 | `/fd-standards`      | Définit les conventions clean code + sécurité (`docs/standards.md`). |
 
 ### Cycle par story
@@ -79,6 +90,7 @@ flowchart TD
 | Commande       | Rôle |
 |----------------|------|
 | `/fd-research`  | Explore le code existant, le domaine, les contraintes et risques d'une story. |
+| `/fd-design`    | Traduit une story à impact visible en spec de design (`docs/designs/<id>.md`), alignée sur le design system. |
 | `/fd-plan`      | Écrit un plan d'implémentation détaillé ; gate `validated: no` par défaut. |
 | `/fd-execute`   | Implémente strictement selon le plan validé — refuse sinon. |
 | `/fd-test`      | Écrit et exécute les tests (unitaires + intégration), rapporte la couverture. |
@@ -86,6 +98,13 @@ flowchart TD
 | `/fd-security`  | Revue sécurité : secrets, dépendances, authn/z, injections, checklist OWASP. |
 | `/fd-doc`       | Met à jour la documentation impactée (README, API, changelog). |
 | `/fd-ship`      | Gate final : merge/release seulement si plan validé + tests OK + review OK + sécurité OK. |
+
+### Infra (au besoin, pas seulement au démarrage)
+
+| Commande       | Rôle |
+|----------------|------|
+| `/fd-infra`     | Génère/actualise Dockerfile, docker-compose, config CI/CD, variables d'environnement (`docs/infra.md`). |
+| `/fd-deploy`    | Checklist et procédure de mise en production (staging/prod, rollback). |
 
 ### Transverse
 
@@ -107,6 +126,7 @@ déclenchent seules quand le contexte correspond :
 | `security-review`   | le code touche l'auth, des secrets, des dépendances ou des entrées utilisateur. |
 | `test-writer`       | une story entre en phase test ou qu'une régression est détectée. |
 | `doc-writer`        | un comportement visible (API/CLI/config) change. |
+| `infra-guard`       | le code touche un Dockerfile, une config CI/CD ou des variables d'environnement. |
 
 ## 6. Enforcement git (`--hooks`)
 
@@ -134,8 +154,11 @@ mon-projet/
     ├── prd.md
     ├── stories.md
     ├── architecture.md
+    ├── design-system.md
     ├── standards.md
+    ├── infra.md
     ├── research/<id>.md
+    ├── designs/<id>.md
     ├── plans/<id>.md
     ├── reviews/<id>.md
     └── templates/               # gabarits, copiés une fois, jamais écrasés sans --force
